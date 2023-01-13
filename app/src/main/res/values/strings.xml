@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">VideoYou</string>
+    <string name="main_page_title">历史播放</string>
+    <string name="main_menu_updateMedia">刷新媒体库</string>
+    <string name="main_navigation_drawer_menu_toHome">主页</string>
+    <string name="main_navigation_drawer_menu_toSettings">设置</string>
+    <string name="main_navigation_drawer_menu_toSearch">搜索</string>
+</resources>

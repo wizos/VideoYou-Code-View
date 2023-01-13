@@ -31,6 +31,7 @@
                 android:layout_height="?attr/actionBarSize"
                 app:menu="@menu/main_app_bar_menu"
                 app:navigationIcon="@drawable/baseline_menu_24"
+                app:navigationIconTint="?android:attr/textColorPrimary"
                 app:title="@string/main_page_title" />
         </com.google.android.material.appbar.AppBarLayout>
 

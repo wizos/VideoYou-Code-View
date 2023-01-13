@@ -2,6 +2,8 @@ package com.clearpole.videoyou.code
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Resources
+import android.graphics.Color
 import android.os.Vibrator
 import android.view.MotionEvent
 import android.view.View
@@ -19,7 +21,7 @@ class VideoPlayerGestureListener {
         private var stateOfPlayerMove = false
 
         @Suppress("DEPRECATION", "ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
-        @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
+        @SuppressLint("ClickableViewAccessibility", "SetTextI18n", "ResourceAsColor")
         fun gestureListener(
             context: Context,
             activityBinding: ActivityVideoPlayerBinding,
@@ -186,6 +188,8 @@ class VideoPlayerGestureListener {
                         // 如果是向左滑动
                         // 向左滑动，左边文本显示想要调整到的时间，右边文本显示现在播放的时间
                         activityBinding.playProgressLeft.text = newTime
+                        activityBinding.playProgressLeft.paint.isFakeBoldText = true
+                        activityBinding.playProgressRight.paint.isFakeBoldText = false
                         activityBinding.playProgressRight.text = nowTime
                         if (newTime!!.contains("-")) {
                             // 如果想要调整到的时间超过逻辑（负数），就返回00:00
@@ -207,6 +211,8 @@ class VideoPlayerGestureListener {
                     } else {
                         // 如果是向右滑动，和上面原理一样，不做解释
                         activityBinding.playProgressLeft.text = nowTime
+                        activityBinding.playProgressLeft.paint.isFakeBoldText = false
+                        activityBinding.playProgressRight.paint.isFakeBoldText = true
                         activityBinding.playProgressRight.text = newTime
                         if (newTime!!.contains("-")) {
                             activityBinding.playProgressRight.text = "00:00"

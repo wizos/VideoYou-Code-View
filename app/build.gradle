@@ -72,7 +72,7 @@ static def appName() {
 }
 
 static def canary() {
-    return "Canary03"
+    return "Canary05"
 }
 
 static def releaseTime() {

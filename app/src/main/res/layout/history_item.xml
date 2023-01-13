@@ -39,23 +39,21 @@
         android:gravity="center_vertical"
         android:orientation="vertical">
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/main_history_item_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="15dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:textColor="#000000"
             android:textSize="18sp" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/main_history_item_size"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:singleLine="true"
-            android:textColor="#000000"
             android:textSize="15sp" />
     </LinearLayout>
 </LinearLayout>

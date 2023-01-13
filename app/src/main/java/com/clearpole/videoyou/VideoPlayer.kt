@@ -2,13 +2,16 @@ package com.clearpole.videoyou
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.media.MediaMetadataRetriever
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
 import android.view.View
 import android.view.WindowManager
 import android.widget.LinearLayout.LayoutParams
+import androidx.annotation.RequiresApi
 import com.clearpole.videoyou.code.VideoPlayerGestureListener.Companion.gestureListener
 import com.clearpole.videoyou.databinding.ActivityVideoPlayerBinding
 import com.clearpole.videoyou.objects.VideoObjects
@@ -43,6 +46,9 @@ class VideoPlayer : BaseActivity<ActivityVideoPlayerBinding>() {
             WindowManager.LayoutParams.FLAG_FULLSCREEN
         )
 
+        mV.videoPlayerPicture.setOnClickListener {
+            this.enterPictureInPictureMode()
+        }
         mV.videoPlayerScreenControlAll.setOnClickListener {
             setFullScreen(true)
             setBarWeight(3f)
@@ -56,6 +62,23 @@ class VideoPlayer : BaseActivity<ActivityVideoPlayerBinding>() {
         setHandControl()
     }
 
+    @Suppress("DEPRECATION")
+    override fun onUserLeaveHint() {
+        this.enterPictureInPictureMode()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onPictureInPictureModeChanged(
+        isInPictureInPictureMode: Boolean,
+        newConfig: Configuration
+    ) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        if (isInPictureInPictureMode){
+            mV.videoPlayerControl.visibility = View.GONE
+        }else{
+            mV.videoPlayerControl.visibility = View.VISIBLE
+        }
+    }
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (isFirstLod) {

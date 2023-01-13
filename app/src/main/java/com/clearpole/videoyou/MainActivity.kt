@@ -1,6 +1,7 @@
 package com.clearpole.videoyou
 
 import android.annotation.SuppressLint
+import android.app.UiModeManager
 import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
@@ -29,6 +30,7 @@ import com.hjq.permissions.OnPermissionCallback
 import com.hjq.permissions.Permission
 import com.hjq.permissions.XXPermissions
 import com.hjq.toast.ToastUtils
+
 
 class MainActivity : BaseActivity<ActivityMainBinding>() {
     private var isFirstLod = true

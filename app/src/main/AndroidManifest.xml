@@ -25,7 +25,9 @@
         tools:targetApi="31">
         <activity
             android:name=".VideoPlayer"
-            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:supportsPictureInPicture="true"
+            android:launchMode="singleTask"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

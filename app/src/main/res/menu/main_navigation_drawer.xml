@@ -12,20 +12,14 @@
                 android:checkable="true"
                 android:icon="@drawable/baseline_settings_24"
                 android:title="@string/main_navigation_drawer_menu_toSettings" />
-            <item
-                android:id="@+id/toSearch"
-                android:checkable="true"
-                android:icon="@drawable/baseline_search_24"
-                android:title="@string/main_navigation_drawer_menu_toSearch" />
         </menu>
     </item>
-    <item android:title="开发者选项">
+    <item android:title="功能选项">
         <menu>
             <item
-                android:id="@+id/readLoadMedia"
-                android:checkable="false"
-                android:icon="@drawable/baseline_code_24"
-                android:title="TODO" />
+                android:id="@+id/toSearch"
+                android:icon="@drawable/baseline_search_24"
+                android:title="@string/main_navigation_drawer_menu_toSearch" />
         </menu>
     </item>
 </menu>

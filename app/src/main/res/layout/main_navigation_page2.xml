@@ -5,8 +5,4 @@
     android:orientation="vertical"
     android:padding="15dp">
 
-    <com.google.android.material.textview.MaterialTextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="此界面尚未开发，暂时用于开发调试" />
 </LinearLayout>

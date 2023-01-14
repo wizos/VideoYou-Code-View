@@ -1,8 +1,8 @@
 package com.clearpole.videoyou
 
 import android.annotation.SuppressLint
-import android.app.UiModeManager
 import android.content.Intent
+import android.content.res.Configuration
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
@@ -11,6 +11,8 @@ import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
+import android.view.animation.AnimationUtils
+import android.view.animation.TranslateAnimation
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -39,9 +41,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ToastUtils.init(this.application)
-        ToastUtils.setView(R.layout.toast_view)
+        //ToastUtils.setView(R.layout.toast_view)
 
-        setBarTransparent(statusBarView = mV.mainPageStatusBar, activity = this)
+        setBarTransparent(statusBarView = mV.mainPageStatusBar, activity = this, resources = resources)
         setTopBar(isActivation = true)
         setNavigationDrawer(isActivation = true)
         setBottomNavigation(isActivation = true)
@@ -67,7 +69,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             mV.mainPageTopBar.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     R.id.upDate -> {
-                        ToastUtils.show("敬请期待")
+                        startActivity(Intent(this,ScrollingActivity::class.java))
                         true
                     }
 
@@ -197,20 +199,77 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     }
 
     private fun setNavigationDrawer(isActivation: Boolean) {
+
+        var nowIn = 0
+
         if (isActivation) {
             mV.mainPageTopBar.setNavigationOnClickListener {
                 mV.mainPageNavigationDrawer.open()
             }
             mV.mainPageNavigationDrawerView.setCheckedItem(R.id.toHome)
             mV.mainPageNavigationDrawerView.setNavigationItemSelectedListener { menuItem ->
-                menuItem.isChecked = true
-                mV.mainPageNavigationDrawer.close()
+                when(menuItem.itemId){
+                    R.id.toHome -> {
+                        animationListener(mV.mainPageViewPager,mV.mainPageSetting,true)
+                        mV.mainPageTopBar.title = "历史播放"
+                        nowIn = 0
+                        mV.mainPageNavigationDrawer.close()
+                        menuItem.isChecked = true
+                    }
+                    R.id.toSettings -> {
+                        animationListener(mV.mainPageSetting,mV.mainPageViewPager,false)
+                        mV.mainPageTopBar.title = "设置"
+                        nowIn = 1
+                        mV.mainPageNavigationDrawer.close()
+                        menuItem.isChecked = true
+                    }
+                    R.id.toSearch -> {
+                        startActivity(Intent(this, SearchActivity::class.java))
+                    }
+                    else -> {
+                        ToastUtils.show(menuItem.itemId)
+                    }
+                }
                 true
             }
             mV.mainPageNavigationDrawerView.getHeaderView(0)
                 .findViewById<ImageView>(R.id.header_back).setOnClickListener {
                     mV.mainPageNavigationDrawer.close()
                 }
+        }
+    }
+
+    private fun animationListener(viewIn: View,viewOut: View,bottomBar: Boolean){
+        val slateAnimaRightSlideIn = TranslateAnimation(
+            1000f, -0f, 0f, 0f)
+        slateAnimaRightSlideIn.duration = 200
+
+        val slateAnimaLeftSlideOut = TranslateAnimation(
+            0f, -1000f, 0f, 0f)
+        slateAnimaLeftSlideOut.duration = 200
+
+        val slateAnimaBottomSlideIn = AnimationUtils.loadAnimation(
+            this,
+            com.google.android.material.R.anim.abc_slide_in_bottom
+        )
+        //slateAnimaBottomSlideIn.duration = 150L
+        val slateAnimaBottomSlideOut = AnimationUtils.loadAnimation(
+            this,
+            com.google.android.material.R.anim.abc_slide_out_bottom
+        )
+        //slateAnimaBottomSlideOut.duration = 150L
+
+        viewIn.visibility = View.VISIBLE
+        viewIn.startAnimation(slateAnimaRightSlideIn)
+        viewOut.startAnimation(slateAnimaLeftSlideOut)
+        viewOut.visibility = View.GONE
+
+        if (bottomBar){
+            mV.mainPageBottomNavigation.visibility = View.VISIBLE
+            mV.mainPageBottomNavigation.startAnimation(slateAnimaBottomSlideIn)
+        }else{
+            mV.mainPageBottomNavigation.startAnimation(slateAnimaBottomSlideOut)
+            mV.mainPageBottomNavigation.visibility = View.GONE
         }
     }
 
@@ -285,4 +344,5 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             }
         }
     }
+
 }

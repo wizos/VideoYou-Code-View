@@ -11,7 +11,7 @@ android {
     }
     defaultConfig {
         applicationId "com.clearpole.videoyou"
-        minSdk 24
+        minSdk 21
         targetSdk 33
         versionCode 1
         if (isCanary()) {
@@ -60,7 +60,7 @@ android {
 }
 
 static def version() {
-    return "0.1.3"
+    return "0.1.5"
 }
 
 static def isCanary() {
@@ -72,7 +72,7 @@ static def appName() {
 }
 
 static def canary() {
-    return "Canary05"
+    return "Canary01"
 }
 
 static def releaseTime() {
@@ -82,10 +82,11 @@ static def releaseTime() {
 dependencies {
     implementation 'androidx.core:core-ktx:1.8.0'
     implementation 'androidx.appcompat:appcompat:1.5.0'
-    implementation 'com.google.android.material:material:1.7.0'
+    implementation 'com.google.android.material:material:1.8.0-rc01'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
     implementation 'androidx.core:core-ktx:1.8.0'
     implementation 'androidx.core:core-ktx:1.8.0'
+    implementation 'androidx.preference:preference:1.2.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
@@ -113,4 +114,8 @@ dependencies {
     // Glide图片加载框架：https://github.com/bumptech/glide
     implementation 'com.github.bumptech.glide:glide:4.14.2'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.14.2'
+    // android任意控件边缘渐隐：https://github.com/qinci/EdgeTranslucent
+    // implementation'ren.qinc.edgetranslucent:lib:0.0.3'
+     // MMKV —— 基于 mmap 的高性能通用 key-value 组件：https://github.com/Tencent/MMKV/
+    implementation 'com.tencent:mmkv:1.2.15'
 }

@@ -2,5 +2,5 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/upDate"
-        android:title="@string/main_menu_updateMedia" />
+        android:title="进入开发者调试" />
 </menu>

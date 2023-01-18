@@ -3,71 +3,135 @@ package com.clearpole.videoyou
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
-import android.media.MediaMetadataRetriever
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Message
 import android.view.View
 import android.view.WindowManager
-import android.widget.LinearLayout.LayoutParams
+import android.widget.RelativeLayout
 import androidx.annotation.RequiresApi
-import com.clearpole.videoyou.code.VideoPlayerGestureListener.Companion.gestureListener
+import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
+import com.clearpole.videoyou.code.VideoPlayerGestureListener
 import com.clearpole.videoyou.databinding.ActivityVideoPlayerBinding
+import com.clearpole.videoyou.model.VideoModel
 import com.clearpole.videoyou.objects.VideoObjects
+import com.clearpole.videoyou.objects.VideoObjects.Companion.paths
+import com.clearpole.videoyou.objects.VideoObjects.Companion.type
+import com.clearpole.videoyou.objects.VideoPlayerObjects
 import com.clearpole.videoyou.untils.SettingsItemsUntil
-import com.clearpole.videoyou.untils.TimeParse
+import com.clearpole.videoyou.untils.TimeParse.Companion.timeParse
 import com.gyf.immersionbar.BarHide
 import com.gyf.immersionbar.ImmersionBar
+import com.hjq.toast.ToastUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.lang.Thread.sleep
 
 
-class VideoPlayer : BaseActivity<ActivityVideoPlayerBinding>() {
-    private var isFirstLod = true
-    private val upDataValue = 1
-    private var stateOfPlay = true
-    private var stateOfSlider = false
-
-    companion object {
-        const val CURRENT_POSITION = "now"
-    }
-
+class VideoPlayer : AppCompatActivity() {
+    @SuppressLint("ResourceType")
     @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val binding: ActivityVideoPlayerBinding =
+            DataBindingUtil.setContentView(this, R.layout.activity_video_player)
+        binding.lifecycleOwner = this
+        binding.videoModel = VideoModel()
         ImmersionBar.with(this).transparentBar().hideBar(BarHide.FLAG_HIDE_NAVIGATION_BAR).init()
-
-        mV.videoPlayerTitle.text = VideoObjects.title
-        mV.videoPlayerVideoSlider.setLabelFormatter { value: Float ->
-            return@setLabelFormatter TimeParse.timeParse(value.toLong()).toString()
+        // 沉浸状态栏
+        VideoModel.videoTitle = VideoObjects.title
+        // 设置标题
+        binding.videoPlayerBottomBarRoot.videoPlayerVideoSlider.setLabelFormatter { value: Float ->
+            return@setLabelFormatter timeParse(value.toLong()).toString()
         }
-
+        // 设置拖动条标签文本
         this.window.setFlags(
             WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN
         )
-
-        mV.videoPlayerPicture.setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                this.enterPictureInPictureMode()
+        // 设置播放器全屏
+        binding.videoPlayerBottomBarRoot.videoPlayerPauseRoot.setOnClickListener {
+            if (!binding.videoView.isPlaying){
+                binding.videoView.start()
+                binding.videoModel?.pauseImg = Drawable.createFromXml(resources,resources.getXml(R.drawable.baseline_pause_24))
+            }else{
+                binding.videoView.pause()
+                binding.videoModel?.pauseImg = Drawable.createFromXml(resources,resources.getXml(R.drawable.baseline_play_arrow_24))
             }
         }
-        mV.videoPlayerScreenControlAll.setOnClickListener {
-            setFullScreen(true)
-            setBarWeight(3f)
+        // 设置播放/暂停
+        binding.videoPlayerBottomBarRoot.videoPlayerScreenRoot.setOnClickListener {
+            if (VideoPlayerObjects.isInFullScreen){
+                VideoPlayerObjects.isInFullScreen = false
+                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                binding.videoModel?.screenImg = Drawable.createFromXml(resources,resources.getXml(R.drawable.baseline_fullscreen_24))
+            }else{
+                VideoPlayerObjects.isInFullScreen = true
+                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                binding.videoModel?.screenImg = Drawable.createFromXml(resources,resources.getXml(R.drawable.baseline_fullscreen_exit_24))
+            }
         }
-        mV.videoPlayerScreenControlAllEdit.setOnClickListener {
-            setFullScreen(false)
-            setBarWeight(5f)
+        // 设置全屏/取消全屏
+        binding.videoPlayerBottomBarRoot.videoPlayerPictureRoot.setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                this.enterPictureInPictureMode()
+            }else{
+                ToastUtils.show("您的系统版本不支持画中画")
+            }
         }
+        // 设置画中画
+        try {
+            when (type) {
+                "LOCAL" -> {
+                    binding.videoView.setVideoPath(paths)
+                    // 如果是本地就载入本地视频路径
+                }
 
-        mV.videoPlayerTopBarBack.setOnClickListener {
-            finish()
+                "INTERNET" -> {
+                    binding.videoView.setVideoURI(Uri.parse(paths))
+                    // 如果是网络视频就载入网络
+                }
+            }
+        } catch (e: Exception) {
+            ToastUtils.show(e.message)
+            // 捕获错误
+        } finally {
+            binding.videoView.start()
+            // 开始播放视频
+            binding.videoView.setOnPreparedListener {
+                // 视频准备完毕之后
+                VideoPlayerGestureListener.gestureListener(this, binding,resources)
+                // 开启手势监听
+                binding.videoModel?.allProgressString =
+                    timeParse(binding.videoView.duration).toString()
+                // 全部时长
+                binding.videoModel?.allProgressFloat = binding.videoView.duration.toFloat()
+                // 全部时长
+                binding.videoModel?.pauseImg = Drawable.createFromXml(resources,resources.getXml(R.drawable.baseline_pause_24))
+                // 设置pause icon
+                binding.videoModel?.screenImg = Drawable.createFromXml(resources,resources.getXml(R.drawable.baseline_fullscreen_24))
+                // 设置screen control icon
+                CoroutineScope(Dispatchers.IO).launch {
+                    // 开启协程
+                    while (true) {
+                        val nowProgress = binding.videoView.currentPosition
+                        if (binding.videoView.isPlaying) {
+                            if (!VideoPlayerObjects.isMove) {
+                                binding.videoModel?.nowProgressString =
+                                    timeParse(nowProgress).toString()
+                                binding.videoModel?.nowProgressLong = nowProgress
+                            }
+                            sleep(500)
+                        }else if (binding.videoView.duration - nowProgress < 50){
+                            finish()
+                        }
+                    }
+                }
+            }
         }
-
-        getVideoInfoToSetSuitScreen()
-        setHandControl()
     }
 
     @Suppress("DEPRECATION")
@@ -86,122 +150,10 @@ class VideoPlayer : BaseActivity<ActivityVideoPlayerBinding>() {
     ) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         if (isInPictureInPictureMode){
-            mV.videoPlayerControlRoot.visibility = View.GONE
+            findViewById<RelativeLayout>(R.id.video_player_control_root).visibility = View.GONE
         }else{
-            mV.videoPlayerControlRoot.visibility = View.VISIBLE
+            findViewById<RelativeLayout>(R.id.video_player_control_root).visibility = View.VISIBLE
         }
     }
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-        if (isFirstLod) {
-            if (VideoObjects.type == "LOCAL") {
-                mV.videoView.setVideoPath(VideoObjects.paths)
-            }else if (VideoObjects.type == "INTERNET"){
-                mV.videoView.setVideoURI(Uri.parse(VideoObjects.paths))
-                mV.videoView.requestFocus()
-            }
-            mV.videoView.setOnPreparedListener {
-                mV.videoView.start()
-                object : Thread() {
-                    override fun run() {
-                        super.run()
-                        upDateUIWhenByProgressChanged()
-                    }
-                }.start()
-            }
-            isFirstLod = false
-        }
-    }
-
-    private fun upDateUIWhenByProgressChanged() = try {
-        while (stateOfPlay) {
-            val videoView = mV.videoView
-            val message = Message.obtain()
-            val mBundle = Bundle()
-            if (videoView.isPlaying) {
-                mBundle.putLong(CURRENT_POSITION, videoView.currentPosition)
-                message.what = 1
-                message.data = mBundle
-                handler.sendMessage(message)
-            }
-            sleep(500)
-
-        }
-    } catch (_: java.lang.Exception) {
-
-    }
-
-    @Suppress("DEPRECATION")
-    private val handler: Handler = @SuppressLint("HandlerLeak")
-    object : Handler() {
-        override fun handleMessage(msg: Message) {
-            super.handleMessage(msg)
-            val nowDuration = mV.videoPlayerVideoSliderNowText
-            val seek = mV.videoPlayerVideoSlider
-            if (msg.what == upDataValue) {
-                val current = msg.data.getLong(CURRENT_POSITION).toFloat()
-                if (current <= mV.videoView.duration && !stateOfSlider) {
-                    seek.value = current
-                }
-                nowDuration.text = TimeParse.timeParse(msg.data.getLong(CURRENT_POSITION))
-            }
-        }
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setHandControl() {
-        gestureListener(context = this, activityBinding = mV, stateOfSliderVal = stateOfSlider)
-    }
-
-    private fun getVideoInfoToSetSuitScreen() {
-        val mmr = MediaMetadataRetriever()
-        try {
-            mmr.setDataSource(VideoObjects.paths)
-            val width =
-                mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toInt()
-            val height =
-                mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toInt()
-            val duration =
-                mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)!!.toFloat()
-            mV.videoPlayerVideoSlider.valueTo = duration
-            mV.videoPlayerVideoSliderAllText.text = TimeParse.timeParse(duration.toLong())
-
-            if (width!! > height!!) {
-                setFullScreen(true)
-                setBarWeight(3f)
-            } else {
-                setFullScreen(false)
-                setBarWeight(5f)
-            }
-        } catch (_: Exception) {
-
-        } finally {
-            mmr.release()
-        }
-    }
-
-    private fun setFullScreen(i: Boolean) {
-        if (i) {
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-            mV.videoPlayerScreenControlAllEdit.visibility = View.VISIBLE
-            mV.videoPlayerScreenControlAll.visibility = View.GONE
-        } else {
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-            mV.videoPlayerScreenControlAllEdit.visibility = View.GONE
-            mV.videoPlayerScreenControlAll.visibility = View.VISIBLE
-        }
-    }
-
-    private fun setBarWeight(f: Float) {
-        mV.videoPlayerTopBar.layoutParams = LayoutParams(
-            LayoutParams.MATCH_PARENT,
-            LayoutParams.MATCH_PARENT, f
-        )
-        mV.videoPlayerBottomBar.layoutParams = LayoutParams(
-            LayoutParams.MATCH_PARENT,
-            LayoutParams.MATCH_PARENT, f
-        )
-    }
-
 
 }

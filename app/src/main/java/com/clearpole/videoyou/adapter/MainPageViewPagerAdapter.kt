@@ -13,7 +13,7 @@ class MainPageViewPagerAdapter : PagerAdapter {
         this.viewList = viewList
     }
 
-    constructor() {}
+    constructor()
 
     //初始化指定位置的页面
     override fun instantiateItem(container: ViewGroup, position: Int): Any {

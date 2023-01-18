@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
     <!-- 修改或删除您共享存储空间中的内容 -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -25,11 +26,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.VideoYou"
         tools:targetApi="31">
+
         <activity
             android:name=".SettingItemsActivity"
             android:exported="false" />
         <activity
-            android:name=".ScrollingActivity"
+            android:name=".DevelopActivity"
             android:exported="false"
             android:label="@string/title_activity_scrolling"
             android:theme="@style/Theme.VideoYou.NoActionBar" />
@@ -37,10 +39,6 @@
             android:name=".SearchActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustNothing" />
-        <activity
-            android:name=".SettingsActivity"
-            android:exported="false"
-            android:label="@string/title_activity_settings" />
         <activity
             android:name=".VideoPlayer"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
@@ -53,12 +51,15 @@
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:scheme="file" />
                 <data android:scheme="content" />
                 <data android:mimeType="video/*" />

@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import com.drake.brv.BindingAdapter
 import com.drake.brv.item.ItemBind
 
-data class HistoryModel(val title: String, val size: String, val img: Bitmap?, val path: String) :
+data class MainVideoItemModel(val title: String, val size: String, val img: Bitmap?, val path: String) :
     ItemBind {
     override fun onBind(holder: BindingAdapter.BindingViewHolder) {
     }

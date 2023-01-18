@@ -2,6 +2,8 @@ package com.clearpole.videoyou.code
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Resources
+import android.graphics.drawable.Drawable
 import android.os.Vibrator
 import android.view.MotionEvent
 import android.view.View
@@ -10,29 +12,26 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.clearpole.videoyou.R
 import com.clearpole.videoyou.databinding.ActivityVideoPlayerBinding
+import com.clearpole.videoyou.objects.VideoPlayerObjects
 import com.clearpole.videoyou.untils.BaseClickListener
 import com.clearpole.videoyou.untils.TimeParse.Companion.timeParse
 import com.google.android.material.slider.Slider
 
 class VideoPlayerGestureListener {
     companion object {
-        private var stateOfPlayerMove = false
-
-        @Suppress("DEPRECATION", "ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+        @Suppress("DEPRECATION")
         @SuppressLint("ClickableViewAccessibility", "SetTextI18n", "ResourceAsColor")
         fun gestureListener(
             context: Context,
             activityBinding: ActivityVideoPlayerBinding,
-            stateOfSliderVal: Boolean,
+            resources:Resources
         ) {
 
-            var stateOfSlider = stateOfSliderVal
-
-            val slateAnimBsSlideIn = AnimationUtils.loadAnimation(
+            AnimationUtils.loadAnimation(
                 context,
                 com.google.android.material.R.anim.design_bottom_sheet_slide_in
             )
-            val slateAnimBsSlideOut = AnimationUtils.loadAnimation(
+            AnimationUtils.loadAnimation(
                 context,
                 com.google.android.material.R.anim.design_bottom_sheet_slide_out
             )
@@ -56,6 +55,8 @@ class VideoPlayerGestureListener {
                 com.google.android.material.R.anim.abc_slide_out_bottom
             )
             slateAnimaBottomSlideOut.duration = 150L
+            val alpha01 = AnimationUtils.loadAnimation(context,R.anim.alpha_0_1)
+            val alpha10 = AnimationUtils.loadAnimation(context,R.anim.alpha_1_0)
 
             var isLongClickMode = false
             // 是否处于长按模式
@@ -81,17 +82,17 @@ class VideoPlayerGestureListener {
             // 底栏是否开启
 
             //设置进度条拖动事件
-            activityBinding.videoPlayerVideoSlider.addOnSliderTouchListener(object :
+            activityBinding.videoPlayerBottomBarRoot.videoPlayerVideoSlider.addOnSliderTouchListener(object :
                 Slider.OnSliderTouchListener {
                 override fun onStartTrackingTouch(slider: Slider) {
-                    stateOfSlider = true
+                    VideoPlayerObjects.isMove = true
                     //开始拖动的时候设置变量，暂停进度条跟随线程变化进度
                 }
 
                 override fun onStopTrackingTouch(slider: Slider) {
                     activityBinding.videoView.seekTo(slider.value.toLong())
                     //结束拖动，将视频进度设置为进度条进度
-                    stateOfSlider = false
+                    VideoPlayerObjects.isMove = false
                     //还原变量，进度条继续跟随线程变化
                 }
 
@@ -101,33 +102,33 @@ class VideoPlayerGestureListener {
             // 申请振动器
 
             // 本方法涵盖：双击屏幕事件，单击屏幕事件
-            activityBinding.videoPlayerControl.setOnClickListener(object : BaseClickListener() {
+            activityBinding.videoPlayerControlRoot.setOnClickListener(object : BaseClickListener() {
                 override fun onSingleClick(v: View?) {
                     // 单击屏幕，判断是否打开工具栏，执行操作
                     if (isOpenBottomToolBar) {
-                        activityBinding.videoPlayerBottomBar.startAnimation(
+                        activityBinding.videoPlayerBottomBarRoot.videoPlayerBottomBar.startAnimation(
                             slateAnimaBottomSlideOut
                         )
-                        activityBinding.videoPlayerBottomBar.visibility = View.GONE
+                        activityBinding.videoPlayerBottomBarRoot.videoPlayerBottomBar.visibility = View.GONE
                         isOpenBottomToolBar = false
                     } else {
                         if (!isOpenToolBar) {
                             // 如果没打开工具栏，执行打开
-                            activityBinding.videoPlayerTopBar.visibility = View.VISIBLE
-                            activityBinding.videoPlayerBottomBar.visibility = View.VISIBLE
-                            activityBinding.videoPlayerTopBar.startAnimation(slateAnimaTopSlideIn)
-                            activityBinding.videoPlayerBottomBar.startAnimation(
+                            activityBinding.videoPlayerTopBarRoot.videoPlayerTopBar.visibility = View.VISIBLE
+                            activityBinding.videoPlayerBottomBarRoot.videoPlayerBottomBar.visibility = View.VISIBLE
+                            activityBinding.videoPlayerTopBarRoot.videoPlayerTopBar.startAnimation(slateAnimaTopSlideIn)
+                            activityBinding.videoPlayerBottomBarRoot.videoPlayerBottomBar.startAnimation(
                                 slateAnimaBottomSlideIn
                             )
                             isOpenToolBar = true
                         } else {
                             // 如果打开了工具栏，执行关闭
-                            activityBinding.videoPlayerTopBar.startAnimation(slateAnimaTopSlideOut)
-                            activityBinding.videoPlayerBottomBar.startAnimation(
+                            activityBinding.videoPlayerTopBarRoot.videoPlayerTopBar.startAnimation(slateAnimaTopSlideOut)
+                            activityBinding.videoPlayerBottomBarRoot.videoPlayerBottomBar.startAnimation(
                                 slateAnimaBottomSlideOut
                             )
-                            activityBinding.videoPlayerTopBar.visibility = View.GONE
-                            activityBinding.videoPlayerBottomBar.visibility = View.GONE
+                            activityBinding.videoPlayerTopBarRoot.videoPlayerTopBar.visibility = View.GONE
+                            activityBinding.videoPlayerBottomBarRoot.videoPlayerBottomBar.visibility = View.GONE
                             isOpenToolBar = false
                         }
                     }
@@ -138,18 +139,20 @@ class VideoPlayerGestureListener {
                     if (isPlayMode) {
                         // 如果正在播放，就暂停视频播放
                         Glide.with(context).load(R.drawable.baseline_play_arrow_24)
-                            .into(activityBinding.isPlayPause)
-                        activityBinding.isPlayPauseRoot.visibility = View.VISIBLE
-                        activityBinding.isPlayPauseRoot.startAnimation(slateAnimBsSlideIn)
+                            .into(activityBinding.videoPlayerAssemblyRoot.isPlayPause)
+                        activityBinding.videoPlayerAssemblyRoot.isPlayPauseRoot.visibility = View.VISIBLE
+                        activityBinding.videoPlayerAssemblyRoot.isPlayPauseRoot.startAnimation(alpha01)
                         activityBinding.videoView.pause()
+                        activityBinding.videoModel?.pauseImg = Drawable.createFromXml(resources,resources.getXml(R.drawable.baseline_play_arrow_24))
                         isPlayMode = false
                     } else {
                         // 如果本来就是暂停播放，就开始播放
                         Glide.with(context).load(R.drawable.baseline_pause_24)
-                            .into(activityBinding.isPlayPause)
-                        activityBinding.isPlayPauseRoot.startAnimation(slateAnimBsSlideOut)
-                        activityBinding.isPlayPauseRoot.visibility = View.GONE
+                            .into(activityBinding.videoPlayerAssemblyRoot.isPlayPause)
+                        activityBinding.videoPlayerAssemblyRoot.isPlayPauseRoot.visibility = View.GONE
+                        activityBinding.videoPlayerAssemblyRoot.isPlayPauseRoot.startAnimation(alpha10)
                         activityBinding.videoView.start()
+                        activityBinding.videoModel?.pauseImg = Drawable.createFromXml(resources,resources.getXml(R.drawable.baseline_pause_24))
                         isPlayMode = true
                     }
                 }
@@ -157,20 +160,20 @@ class VideoPlayerGestureListener {
             })
 
             // 本方法涵盖：长按屏幕事件
-            activityBinding.videoPlayerControl.setOnLongClickListener {
+            activityBinding.videoPlayerControlRoot.setOnLongClickListener {
                 // 长按屏幕，判断是否处于倍速模式
-                if (!isSpeedMode && !stateOfPlayerMove) {
+                if (!isSpeedMode && ! VideoPlayerObjects.isMove) {
                     // 如果目前不是倍速模式，就启动倍速，震动手机一次并隐藏上下工具栏
                     isSpeedMode = true
                     vibrator.vibrate(30)
                     if (isOpenToolBar) {
-                        activityBinding.videoPlayerTopBar.startAnimation(slateAnimaTopSlideOut)
-                        activityBinding.videoPlayerBottomBar.startAnimation(slateAnimaBottomSlideOut)
-                        activityBinding.videoPlayerTopBar.visibility = View.GONE
-                        activityBinding.videoPlayerBottomBar.visibility = View.GONE
+                        activityBinding.videoPlayerTopBarRoot.videoPlayerTopBar.startAnimation(slateAnimaTopSlideOut)
+                        activityBinding.videoPlayerBottomBarRoot.videoPlayerBottomBar.startAnimation(slateAnimaBottomSlideOut)
+                        activityBinding.videoPlayerTopBarRoot.videoPlayerTopBar.visibility = View.GONE
+                        activityBinding.videoPlayerBottomBarRoot.videoPlayerBottomBar.visibility = View.GONE
                     }
-                    activityBinding.videoPlayer2x.visibility = View.VISIBLE
-                    activityBinding.videoPlayer2x.startAnimation(slateAnimBsSlideIn)
+                    activityBinding.videoPlayerAssemblyRoot.videoPlayer2x.visibility = View.VISIBLE
+                    activityBinding.videoPlayerAssemblyRoot.videoPlayer2x.startAnimation(alpha01)
                     activityBinding.videoView.playbackSpeed = 2.0f
                     isLongClickMode = true
                     // 声明：现在处于长按状态
@@ -181,7 +184,7 @@ class VideoPlayerGestureListener {
             }
 
             //此方法涵盖：左右滑动调整进度
-            activityBinding.videoPlayerControl.setOnTouchListener { _, event ->
+            activityBinding.videoPlayerControlRoot.setOnTouchListener { _, event ->
                 // 当手指刚接触的屏幕
                 if (event.action == MotionEvent.ACTION_DOWN) {
                     if (!isImplement) {
@@ -194,9 +197,10 @@ class VideoPlayerGestureListener {
                 if (event.action == MotionEvent.ACTION_MOVE) {
                     if (!isImplements) {
                         activityBinding.videoView.pause()
+                        VideoPlayerObjects.isMove = true
                         if (!isOpenBottomToolBar && !isOpenToolBar) {
-                            activityBinding.videoPlayerBottomBar.visibility = View.VISIBLE
-                            activityBinding.videoPlayerBottomBar.startAnimation(
+                            activityBinding.videoPlayerBottomBarRoot.videoPlayerBottomBar.visibility = View.VISIBLE
+                            activityBinding.videoPlayerBottomBarRoot.videoPlayerBottomBar.startAnimation(
                                 slateAnimaBottomSlideIn
                             )
                             isOpenBottomToolBar = true
@@ -214,85 +218,84 @@ class VideoPlayerGestureListener {
                     if (stateOfScroll == "LEFT") {
                         // 如果是向左滑动
                         // 向左滑动，左边文本显示想要调整到的时间，右边文本显示现在播放的时间
-                        activityBinding.playProgressLeft.text = newTime
-                        activityBinding.playProgressLeft.paint.isFakeBoldText = true
-                        activityBinding.playProgressRight.paint.isFakeBoldText = false
-                        activityBinding.playProgressRight.text = nowTime
+                        activityBinding.videoPlayerAssemblyRoot.playProgressLeft.text = newTime
+                        activityBinding.videoPlayerAssemblyRoot.playProgressLeft.paint.isFakeBoldText = true
+                        activityBinding.videoPlayerAssemblyRoot.playProgressRight.paint.isFakeBoldText = false
+                        activityBinding.videoPlayerAssemblyRoot.playProgressRight.text = nowTime
                         if (newTime!!.contains("-")) {
                             // 如果想要调整到的时间超过逻辑（负数），就返回00:00
-                            activityBinding.playProgressLeft.text = "00:00"
+                            activityBinding.videoPlayerAssemblyRoot.playProgressLeft.text = "00:00"
                             newProgressLong = 0L
                             // 调整到视频0进度
                         } else if (newPosition > activityBinding.videoView.duration) {
                             // 如果想要调整到的地方是大于视频总长度的，不符合逻辑，返回视频最后处
-                            activityBinding.playProgressLeft.text =
+                            activityBinding.videoPlayerAssemblyRoot.playProgressLeft.text =
                                 timeParse(activityBinding.videoView.duration)
                             newProgressLong = activityBinding.videoView.duration
                             // 调整到视频最大进度
                         } else {
                             // 不符合以上两种特殊情况，则为正常情况
-                            activityBinding.playProgressLeft.text = newTime
+                            activityBinding.videoPlayerAssemblyRoot.playProgressLeft.text = newTime
                             newProgressLong = newPosition
                             // 调整到想要调整的进度
                         }
                     } else {
                         // 如果是向右滑动，和上面原理一样，不做解释
-                        activityBinding.playProgressLeft.text = nowTime
-                        activityBinding.playProgressLeft.paint.isFakeBoldText = false
-                        activityBinding.playProgressRight.paint.isFakeBoldText = true
-                        activityBinding.playProgressRight.text = newTime
+                        activityBinding.videoPlayerAssemblyRoot.playProgressLeft.text = nowTime
+                        activityBinding.videoPlayerAssemblyRoot.playProgressLeft.paint.isFakeBoldText = false
+                        activityBinding.videoPlayerAssemblyRoot.playProgressRight.paint.isFakeBoldText = true
+                        activityBinding.videoPlayerAssemblyRoot.playProgressRight.text = newTime
                         if (newTime!!.contains("-")) {
-                            activityBinding.playProgressRight.text = "00:00"
+                            activityBinding.videoPlayerAssemblyRoot.playProgressRight.text = "00:00"
                             newProgressLong = 0
                         } else if (newPosition > activityBinding.videoView.duration) {
-                            activityBinding.playProgressRight.text =
+                            activityBinding.videoPlayerAssemblyRoot.playProgressRight.text =
                                 timeParse(activityBinding.videoView.duration)
                             newProgressLong = activityBinding.videoView.duration
                         } else {
-                            activityBinding.playProgressRight.text = newTime
+                            activityBinding.videoPlayerAssemblyRoot.playProgressRight.text = newTime
                             newProgressLong = newPosition
                         }
                     }
 
                     if (newPosition > nowPosition) {
                         // 如果想要调整的进度大于目前正在播放的进度，则手指正在向右滑动
-                        activityBinding.playProgressTo.text = "->"
+                        activityBinding.videoPlayerAssemblyRoot.playProgressTo.text = "->"
                         stateOfScroll = "RIGHT"
                     } else {
                         // 如果想要调整的进度小于目前正在播放的进度，则手指正在向左滑动
-                        activityBinding.playProgressTo.text = "<-"
+                        activityBinding.videoPlayerAssemblyRoot.playProgressTo.text = "<-"
                         stateOfScroll = "LEFT"
                     }
 
                     if (!isMoveMode && !isSpeedMode) {
                         // 如果手指不处于移动状态且不在进行倍速播放，就显示调整进度的信息框架
                         isMoveMode = true
-                        activityBinding.playProgressRoot.visibility = View.VISIBLE
-                        activityBinding.playProgressTo.text = "->"
-                        stateOfPlayerMove = true
+                        activityBinding.videoPlayerAssemblyRoot.playProgressRoot.visibility = View.VISIBLE
+                        activityBinding.videoPlayerAssemblyRoot.playProgressTo.text = "->"
                     }
                     // activityBinding.videoView.seekTo(newProgressLong)
                     if (newProgressLong>1) {
-                        activityBinding.videoPlayerVideoSlider.value = newProgressLong.toFloat()
+                        activityBinding.videoPlayerBottomBarRoot.videoPlayerVideoSlider.value = newProgressLong.toFloat()
                     }else{
-                        activityBinding.videoPlayerVideoSlider.value = 0F
+                        activityBinding.videoPlayerBottomBarRoot.videoPlayerVideoSlider.value = 0F
                     }
                 } else if (event.action == MotionEvent.ACTION_UP) {
                     // 手指离开屏幕执行的事件
                     if (isMoveMode) {
-                        activityBinding.playProgressRoot.visibility = View.GONE
+                        activityBinding.videoPlayerAssemblyRoot.playProgressRoot.visibility = View.GONE
                         isMoveMode = false
-                        stateOfPlayerMove = false
                         isImplement = false
                         isImplements = false
+                        VideoPlayerObjects.isMove = false
                         activityBinding.videoView.seekTo(newProgressLong)
                         activityBinding.videoView.start()
                         // 离开屏幕后将视频调整到欲调整的位置
                     }
                     if (isLongClickMode) {
                         // 如果正在倍速，离开屏幕就停止倍速
-                        activityBinding.videoPlayer2x.startAnimation(slateAnimBsSlideOut)
-                        activityBinding.videoPlayer2x.visibility = View.GONE
+                        activityBinding.videoPlayerAssemblyRoot.videoPlayer2x.startAnimation(alpha10)
+                        activityBinding.videoPlayerAssemblyRoot.videoPlayer2x.visibility = View.GONE
                         activityBinding.videoView.playbackSpeed = 1.0f
                         isSpeedMode = false
                         isLongClickMode = false

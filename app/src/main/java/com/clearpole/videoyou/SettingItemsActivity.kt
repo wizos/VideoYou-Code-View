@@ -20,12 +20,12 @@ class SettingItemsActivity : BaseActivity<ActivitySettingItemsBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         SetBarTransparent.setBarTransparent(
-            mV.root.findViewById(R.id.setting_items_status) as LinearLayout,
+            binding.root.findViewById(R.id.setting_items_status) as LinearLayout,
             this,
             resources
         )
-        mV.topAppBar.title = SettingObjects.name
-        mV.topAppBar.setNavigationOnClickListener {
+        binding.topAppBar.title = SettingObjects.name
+        binding.topAppBar.setNavigationOnClickListener {
             finish()
         }
         try {
@@ -51,8 +51,8 @@ class SettingItemsActivity : BaseActivity<ActivitySettingItemsBinding>() {
     }
 
     private fun settingAbout(){
-        mV.settingAbout.root.visibility = View.VISIBLE
-        mV.settingAbout.intoQq.setOnClickListener {
+        binding.settingAbout.root.visibility = View.VISIBLE
+        binding.settingAbout.intoQq.setOnClickListener {
             MaterialAlertDialogBuilder(
                 this@SettingItemsActivity,
                 com.google.android.material.R.style.MaterialAlertDialog_Material3
@@ -71,36 +71,36 @@ class SettingItemsActivity : BaseActivity<ActivitySettingItemsBinding>() {
     }
 
     private fun settingCurrency() {
-        mV.settingCurrency.root.visibility = View.VISIBLE
+        binding.settingCurrency.root.visibility = View.VISIBLE
         val mode = SettingsItemsUntil.readSettingData("isAutoPicture")?.toBoolean()!!
-        mV.settingCurrency.settingCurrencyPicture.isChecked = mode
-        mV.settingCurrency.settingCurrencyPictureRoot.setOnClickListener {
-            if (mV.settingCurrency.settingCurrencyPicture.isChecked) {
-                mV.settingCurrency.settingCurrencyPicture.isChecked = false
+        binding.settingCurrency.settingCurrencyPicture.isChecked = mode
+        binding.settingCurrency.settingCurrencyPictureRoot.setOnClickListener {
+            if (binding.settingCurrency.settingCurrencyPicture.isChecked) {
+                binding.settingCurrency.settingCurrencyPicture.isChecked = false
                 SettingsItemsUntil.writeSettingData("isAutoPicture", "false")
             } else {
-                mV.settingCurrency.settingCurrencyPicture.isChecked = true
+                binding.settingCurrency.settingCurrencyPicture.isChecked = true
                 SettingsItemsUntil.writeSettingData("isAutoPicture", "true")
             }
         }
     }
 
     private fun settingTheme() {
-        mV.settingTheme.root.visibility = View.VISIBLE
-        mV.settingTheme.settingThemeRippleView.isChecked =
+        binding.settingTheme.root.visibility = View.VISIBLE
+        binding.settingTheme.settingThemeRippleView.isChecked =
             SettingsItemsUntil.readSettingData("isRipple").toBoolean()
-        mV.settingTheme.settingThemeRippleRoot.setOnClickListener {
-            if (mV.settingTheme.settingThemeRippleView.isChecked) {
-                mV.settingTheme.settingThemeRippleView.isChecked = false
+        binding.settingTheme.settingThemeRippleRoot.setOnClickListener {
+            if (binding.settingTheme.settingThemeRippleView.isChecked) {
+                binding.settingTheme.settingThemeRippleView.isChecked = false
                 SettingsItemsUntil.writeSettingData("isRipple", "false")
             } else {
-                mV.settingTheme.settingThemeRippleView.isChecked = true
+                binding.settingTheme.settingThemeRippleView.isChecked = true
                 SettingsItemsUntil.writeSettingData("isRipple", "true")
             }
         }
 
         val mode = SettingsItemsUntil.readSettingData("darkMode")?.toInt()!!
-        mV.settingTheme.settingThemeDarkMode.text =
+        binding.settingTheme.settingThemeDarkMode.text =
             when (mode) {
                 0 -> {
                     "跟随系统"
@@ -119,7 +119,7 @@ class SettingItemsActivity : BaseActivity<ActivitySettingItemsBinding>() {
                 }
             }
 
-        mV.settingTheme.settingThemeDayNightMode.setOnClickListener {
+        binding.settingTheme.settingThemeDayNightMode.setOnClickListener {
             val choices = arrayOf<CharSequence>("跟随系统", "始终开启", "始终关闭")
             MaterialAlertDialogBuilder(this)
                 .setTitle("深色模式")
@@ -132,7 +132,7 @@ class SettingItemsActivity : BaseActivity<ActivitySettingItemsBinding>() {
                     val checkedItemPosition: Int =
                         (dialog as AlertDialog).listView.checkedItemPosition
                     if (checkedItemPosition != AdapterView.INVALID_POSITION) {
-                        mV.settingTheme.settingThemeDarkMode.text = choices[checkedItemPosition]
+                        binding.settingTheme.settingThemeDarkMode.text = choices[checkedItemPosition]
                         SettingsItemsUntil.writeSettingData(
                             "darkMode",
                             checkedItemPosition.toString()

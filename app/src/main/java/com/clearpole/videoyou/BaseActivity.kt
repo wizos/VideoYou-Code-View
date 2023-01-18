@@ -9,13 +9,13 @@ import com.hjq.toast.ToastUtils
 import com.tencent.mmkv.MMKV
 
 abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
-    lateinit var mV: VB
+    lateinit var binding: VB
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ToastUtils.init(this.application)
         DynamicColors.applyToActivityIfAvailable(this)
-        mV = ViewBindingUtil.inflateWithGeneric(this, layoutInflater)
+        binding = ViewBindingUtil.inflateWithGeneric(this, layoutInflater)
         MMKV.initialize(this)
-        setContentView(mV.root)
+        setContentView(binding.root)
     }
 }

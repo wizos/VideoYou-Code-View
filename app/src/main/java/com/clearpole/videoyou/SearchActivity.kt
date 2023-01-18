@@ -2,17 +2,12 @@ package com.clearpole.videoyou
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
-import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView
 import com.clearpole.videoyou.databinding.ActivitySearchBinding
 import com.clearpole.videoyou.databinding.HistoryItemBinding
-import com.clearpole.videoyou.model.HistoryModel
+import com.clearpole.videoyou.model.MainVideoItemModel
 import com.clearpole.videoyou.objects.VideoObjects
-import com.clearpole.videoyou.untils.ByteToString
 import com.clearpole.videoyou.untils.DatabaseStorage
 import com.clearpole.videoyou.untils.GetVideoThumbnail
 import com.clearpole.videoyou.untils.IsNightMode
@@ -31,10 +26,10 @@ class SearchActivity : BaseActivity<ActivitySearchBinding>(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
        ImmersionBar.with(this).transparentBar().statusBarDarkFont(!IsNightMode.isNightMode(resources)).init()
-        mV.catSearchView.editText.setOnEditorActionListener { v, _, _ ->
-            mV.catSearchBar.text = v.text
+        binding.catSearchView.editText.setOnEditorActionListener { v, _, _ ->
+            binding.catSearchBar.text = v.text
             setSearchList(v.text.toString())
-            mV.catSearchView.hide()
+            binding.catSearchView.hide()
             false
         }
     }
@@ -45,22 +40,22 @@ class SearchActivity : BaseActivity<ActivitySearchBinding>(){
             val models = getDataForSearch(key,DatabaseStorage.readDataByData())
             val isRipple = SettingsItemsUntil.readSettingData("isRipple").toBoolean()
             launch(Dispatchers.Main) {
-                mV.searchRv.linear().setup {
-                    addType<HistoryModel> { R.layout.history_item }
+                binding.searchRv.linear().setup {
+                    addType<MainVideoItemModel> { R.layout.history_item }
                     onBind {
                         val binding = HistoryItemBinding.bind(itemView)
                         binding.mainHistoryItemName.text =
-                            getModel<HistoryModel>(layoutPosition).title
+                            getModel<MainVideoItemModel>(layoutPosition).title
                         binding.mainHistoryItemSize.text =
-                            getModel<HistoryModel>(layoutPosition).size
+                            getModel<MainVideoItemModel>(layoutPosition).size
                         binding.historyItemCover.setImageBitmap(
-                            getModel<HistoryModel>(
+                            getModel<MainVideoItemModel>(
                                 layoutPosition
                             ).img
                         )
                         binding.historyItemRoot.setOnClickListener {
-                            VideoObjects.paths = getModel<HistoryModel>(layoutPosition).path
-                            VideoObjects.title = getModel<HistoryModel>(layoutPosition).title
+                            VideoObjects.paths = getModel<MainVideoItemModel>(layoutPosition).path
+                            VideoObjects.title = getModel<MainVideoItemModel>(layoutPosition).title
                             VideoObjects.type = "LOCAL"
                             val intent = Intent(this@SearchActivity, VideoPlayer::class.java)
                             startActivity(intent)
@@ -79,7 +74,7 @@ class SearchActivity : BaseActivity<ActivitySearchBinding>(){
                 val jsonObject = JSONObject(kv.getString(index))
                 if (jsonObject.getString("title").contains(key)) {
                     add(
-                        HistoryModel(
+                        MainVideoItemModel(
                             title = jsonObject.getString("title"),
                             size = jsonObject.getString("size"),
                             img = GetVideoThumbnail.getVideoThumbnail(

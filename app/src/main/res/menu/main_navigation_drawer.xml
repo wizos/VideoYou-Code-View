@@ -20,6 +20,10 @@
                 android:id="@+id/toSearch"
                 android:icon="@drawable/baseline_search_24"
                 android:title="@string/main_navigation_drawer_menu_toSearch" />
+            <item
+                android:id="@+id/toInternet"
+                android:icon="@drawable/baseline_wifi_tethering_24"
+                android:title="串流" />
         </menu>
     </item>
 </menu>

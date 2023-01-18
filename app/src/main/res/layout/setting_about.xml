@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/setting_items_status"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:orientation="vertical" />
+
+    <RelativeLayout
+        android:id="@+id/into_qq"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:padding="20dp">
+
+        <ImageView
+            android:id="@+id/s_5_i"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:layout_centerVertical="true"
+            android:src="@drawable/baseline_mark_unread_chat_alt_24"
+            app:tint="@color/color6" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="15dp"
+            android:layout_toEndOf="@id/s_5_i"
+            android:text="加入官方QQ频道"
+            android:textSize="17sp" />
+
+        <ImageView
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/baseline_chevron_right_24"
+            app:tint="@color/color6" />
+    </RelativeLayout>
+
+
+</LinearLayout>

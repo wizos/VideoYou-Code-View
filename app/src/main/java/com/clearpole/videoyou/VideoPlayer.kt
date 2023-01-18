@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.media.MediaMetadataRetriever
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -15,6 +16,7 @@ import androidx.annotation.RequiresApi
 import com.clearpole.videoyou.code.VideoPlayerGestureListener.Companion.gestureListener
 import com.clearpole.videoyou.databinding.ActivityVideoPlayerBinding
 import com.clearpole.videoyou.objects.VideoObjects
+import com.clearpole.videoyou.untils.SettingsItemsUntil
 import com.clearpole.videoyou.untils.TimeParse
 import com.gyf.immersionbar.BarHide
 import com.gyf.immersionbar.ImmersionBar
@@ -47,7 +49,9 @@ class VideoPlayer : BaseActivity<ActivityVideoPlayerBinding>() {
         )
 
         mV.videoPlayerPicture.setOnClickListener {
-            this.enterPictureInPictureMode()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                this.enterPictureInPictureMode()
+            }
         }
         mV.videoPlayerScreenControlAll.setOnClickListener {
             setFullScreen(true)
@@ -58,13 +62,21 @@ class VideoPlayer : BaseActivity<ActivityVideoPlayerBinding>() {
             setBarWeight(5f)
         }
 
+        mV.videoPlayerTopBarBack.setOnClickListener {
+            finish()
+        }
+
         getVideoInfoToSetSuitScreen()
         setHandControl()
     }
 
     @Suppress("DEPRECATION")
     override fun onUserLeaveHint() {
-        this.enterPictureInPictureMode()
+        if (SettingsItemsUntil.readSettingData("isAutoPicture").toBoolean()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                this.enterPictureInPictureMode()
+            }
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -74,15 +86,20 @@ class VideoPlayer : BaseActivity<ActivityVideoPlayerBinding>() {
     ) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         if (isInPictureInPictureMode){
-            mV.videoPlayerControl.visibility = View.GONE
+            mV.videoPlayerControlRoot.visibility = View.GONE
         }else{
-            mV.videoPlayerControl.visibility = View.VISIBLE
+            mV.videoPlayerControlRoot.visibility = View.VISIBLE
         }
     }
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (isFirstLod) {
-            mV.videoView.setVideoPath(VideoObjects.paths)
+            if (VideoObjects.type == "LOCAL") {
+                mV.videoView.setVideoPath(VideoObjects.paths)
+            }else if (VideoObjects.type == "INTERNET"){
+                mV.videoView.setVideoURI(Uri.parse(VideoObjects.paths))
+                mV.videoView.requestFocus()
+            }
             mV.videoView.setOnPreparedListener {
                 mV.videoView.start()
                 object : Thread() {

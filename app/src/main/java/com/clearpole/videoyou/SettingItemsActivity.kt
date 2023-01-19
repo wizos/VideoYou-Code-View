@@ -11,8 +11,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
 import com.clearpole.videoyou.databinding.ActivitySettingItemsBinding
 import com.clearpole.videoyou.objects.SettingObjects
-import com.clearpole.videoyou.untils.SetBarTransparent
-import com.clearpole.videoyou.untils.SettingsItemsUntil
+import com.clearpole.videoyou.utils.SetBarTransparent
+import com.clearpole.videoyou.utils.SettingsItemsUntil
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 

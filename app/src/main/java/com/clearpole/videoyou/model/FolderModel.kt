@@ -1,10 +1,9 @@
 package com.clearpole.videoyou.model
 
 import android.content.ContentResolver
-import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
-import com.clearpole.videoyou.untils.GetVideoThumbnail
+import com.clearpole.videoyou.utils.GetVideoThumbnail
 import com.drake.brv.item.ItemExpand
 
 

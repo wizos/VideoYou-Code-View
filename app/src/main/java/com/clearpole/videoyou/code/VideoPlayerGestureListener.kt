@@ -13,8 +13,8 @@ import com.bumptech.glide.Glide
 import com.clearpole.videoyou.R
 import com.clearpole.videoyou.databinding.ActivityVideoPlayerBinding
 import com.clearpole.videoyou.objects.VideoPlayerObjects
-import com.clearpole.videoyou.untils.BaseClickListener
-import com.clearpole.videoyou.untils.TimeParse.Companion.timeParse
+import com.clearpole.videoyou.utils.BaseClickListener
+import com.clearpole.videoyou.utils.TimeParse.Companion.timeParse
 import com.google.android.material.slider.Slider
 
 class VideoPlayerGestureListener {
@@ -134,6 +134,7 @@ class VideoPlayerGestureListener {
                     }
                 }
 
+                @SuppressLint("ResourceType")
                 override fun onDoubleClick(v: View?) {
                     // 双击屏幕，判断是否处于播放状态
                     if (isPlayMode) {

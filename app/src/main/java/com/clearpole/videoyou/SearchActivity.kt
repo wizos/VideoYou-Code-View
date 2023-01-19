@@ -8,10 +8,10 @@ import com.clearpole.videoyou.databinding.ActivitySearchBinding
 import com.clearpole.videoyou.databinding.HistoryItemBinding
 import com.clearpole.videoyou.model.MainVideoItemModel
 import com.clearpole.videoyou.objects.VideoObjects
-import com.clearpole.videoyou.untils.DatabaseStorage
-import com.clearpole.videoyou.untils.GetVideoThumbnail
-import com.clearpole.videoyou.untils.IsNightMode
-import com.clearpole.videoyou.untils.SettingsItemsUntil
+import com.clearpole.videoyou.utils.DatabaseStorage
+import com.clearpole.videoyou.utils.GetVideoThumbnail
+import com.clearpole.videoyou.utils.IsNightMode
+import com.clearpole.videoyou.utils.SettingsItemsUntil
 import com.drake.brv.utils.linear
 import com.drake.brv.utils.setup
 import com.gyf.immersionbar.ImmersionBar

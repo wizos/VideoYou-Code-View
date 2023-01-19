@@ -13,19 +13,21 @@ import android.widget.RelativeLayout
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import cn.jzvd.JzvdStd
 import com.clearpole.videoyou.code.VideoPlayerGestureListener
+import com.clearpole.videoyou.code.VideoPlayerIjk
 import com.clearpole.videoyou.databinding.ActivityVideoPlayerBinding
 import com.clearpole.videoyou.model.VideoModel
 import com.clearpole.videoyou.objects.VideoObjects
 import com.clearpole.videoyou.objects.VideoObjects.Companion.paths
 import com.clearpole.videoyou.objects.VideoObjects.Companion.type
 import com.clearpole.videoyou.objects.VideoPlayerObjects
-import com.clearpole.videoyou.untils.SettingsItemsUntil
-import com.clearpole.videoyou.untils.TimeParse.Companion.timeParse
+import com.clearpole.videoyou.utils.SettingsItemsUntil
+import com.clearpole.videoyou.utils.TimeParse.Companion.timeParse
 import com.gyf.immersionbar.BarHide
 import com.gyf.immersionbar.ImmersionBar
 import com.hjq.toast.ToastUtils
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineScope 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.lang.Thread.sleep
@@ -74,6 +76,7 @@ class VideoPlayer : AppCompatActivity() {
                 binding.videoModel?.screenImg = Drawable.createFromXml(resources,resources.getXml(R.drawable.baseline_fullscreen_exit_24))
             }
         }
+        binding.jz.setUp(paths,"1",JzvdStd.SCREEN_FULLSCREEN,VideoPlayerIjk::class.java)
         // 设置全屏/取消全屏
         binding.videoPlayerBottomBarRoot.videoPlayerPictureRoot.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -99,7 +102,7 @@ class VideoPlayer : AppCompatActivity() {
             ToastUtils.show(e.message)
             // 捕获错误
         } finally {
-            binding.videoView.start()
+            //binding.videoView.start()
             // 开始播放视频
             binding.videoView.setOnPreparedListener {
                 // 视频准备完毕之后
@@ -116,7 +119,7 @@ class VideoPlayer : AppCompatActivity() {
                 // 设置screen control icon
                 CoroutineScope(Dispatchers.IO).launch {
                     // 开启协程
-                    while (true) {
+                    /*while (true) {
                         val nowProgress = binding.videoView.currentPosition
                         if (binding.videoView.isPlaying) {
                             if (!VideoPlayerObjects.isMove) {
@@ -128,7 +131,7 @@ class VideoPlayer : AppCompatActivity() {
                         }else if (binding.videoView.duration - nowProgress < 50){
                             finish()
                         }
-                    }
+                    }*/
                 }
             }
         }

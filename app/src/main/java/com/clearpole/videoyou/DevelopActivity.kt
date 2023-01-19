@@ -5,7 +5,7 @@ import android.graphics.Shader
 import android.os.Build
 import android.os.Bundle
 import com.clearpole.videoyou.databinding.ActivityDevelopBinding
-import com.clearpole.videoyou.untils.IsNightMode
+import com.clearpole.videoyou.utils.IsNightMode
 import com.gyf.immersionbar.ImmersionBar
 import com.hjq.toast.ToastUtils
 import com.tencent.mmkv.MMKV

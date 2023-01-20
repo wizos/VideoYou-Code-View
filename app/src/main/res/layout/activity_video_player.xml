@@ -14,22 +14,16 @@
         android:layout_height="match_parent"
         android:background="#000000">
 
-        <com.devbrackets.android.exomedia.ui.widget.VideoView
+        <com.google.android.exoplayer2.ui.PlayerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:id="@+id/video_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone"/>
-
-        <cn.jzvd.JzvdStd
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/jz"/>
+            bind:use_controller="false"/>
 
         <RelativeLayout
             android:id="@+id/video_player_control_root"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone">
+            android:layout_height="match_parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -37,6 +31,7 @@
                 android:orientation="vertical">
 
                 <LinearLayout
+                    android:id="@+id/video_player_top_root"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="4">
@@ -52,6 +47,7 @@
                     android:layout_weight="1" />
 
                 <LinearLayout
+                    android:id="@+id/video_player_bottom_root"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="4">

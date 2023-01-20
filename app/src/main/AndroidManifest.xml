@@ -41,7 +41,7 @@
             android:windowSoftInputMode="adjustNothing" />
         <activity
             android:name=".VideoPlayer"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:exported="false"
             android:launchMode="singleTask"
             android:supportsPictureInPicture="true" />

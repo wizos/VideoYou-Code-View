@@ -59,17 +59,23 @@ class VideoPlayer : AppCompatActivity() {
         VideoPlayerObjects.isAutoFinish = false
         binding.videoPlayerBottomBarRoot.videoPlayerPauseRoot.setOnClickListener {
             if (!binding.videoView.player!!.isPlaying) {
-                binding.videoView.player?.play()
-                binding.videoModel?.pauseImg = Drawable.createFromXml(
+                val draw = Drawable.createFromXml(
                     resources,
                     resources.getXml(R.drawable.baseline_pause_24)
                 )
+                binding.videoView.player?.play()
+                binding.videoModel?.pauseImg = draw
+                binding.videoPlayerAssemblyRoot.isPlayPauseRoot.visibility = View.GONE
+                binding.videoPlayerAssemblyRoot.isPlayPause.setImageDrawable(draw)
             } else {
                 binding.videoView.player?.pause()
-                binding.videoModel?.pauseImg = Drawable.createFromXml(
+                val draw = Drawable.createFromXml(
                     resources,
                     resources.getXml(R.drawable.baseline_play_arrow_24)
                 )
+                binding.videoPlayerAssemblyRoot.isPlayPauseRoot.visibility = View.VISIBLE
+                binding.videoPlayerAssemblyRoot.isPlayPause.setImageDrawable(draw)
+                binding.videoModel?.pauseImg = draw
             }
         }
         // 设置播放/暂停

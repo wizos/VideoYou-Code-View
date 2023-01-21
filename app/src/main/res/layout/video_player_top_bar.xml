@@ -49,6 +49,18 @@
                 android:textColor="#ffffff"
                 android:textSize="17sp"
                 tools:targetApi="s" />
+
+            <ImageView
+                android:id="@+id/video_player_topBar_menu"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginEnd="25dp"
+                android:layout_marginBottom="25dp"
+                android:src="@drawable/baseline_menu_24"
+                app:tint="#ffffff"
+                tools:ignore="ContentDescription" />
         </RelativeLayout>
     </LinearLayout>
 </layout>

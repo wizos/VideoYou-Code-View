@@ -3,4 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="正在开发，预计下个版本开放..."
+        android:textSize="17sp"/>
 </LinearLayout>

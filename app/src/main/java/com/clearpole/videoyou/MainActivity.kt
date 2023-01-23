@@ -25,6 +25,7 @@ import com.clearpole.videoyou.databinding.HistoryItemBinding
 import com.clearpole.videoyou.model.FolderModel
 import com.clearpole.videoyou.model.FolderModelDad
 import com.clearpole.videoyou.model.MainVideoItemModel
+import com.clearpole.videoyou.model.WebDavModel
 import com.clearpole.videoyou.objects.SettingObjects
 import com.clearpole.videoyou.objects.VideoObjects
 import com.clearpole.videoyou.utils.DatabaseStorage
@@ -48,15 +49,22 @@ import com.hjq.toast.ToastUtils
 import com.scwang.smart.refresh.layout.api.RefreshLayout
 import com.scwang.smart.refresh.layout.listener.OnRefreshListener
 import com.tencent.mmkv.MMKV
+import com.thegrizzlylabs.sardineandroid.Sardine
+import com.thegrizzlylabs.sardineandroid.impl.OkHttpSardine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import okhttp3.Call
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.IOException
 
 
 class MainActivity : BaseActivity<ActivityMainBinding>() {
     private var isFirstLod = true
+
     // 是否第一次获取焦点
     private var nowIn = 0
     // 现在在哪个界面[主页:0,设置:1]
@@ -74,7 +82,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         setThemeMode()
         // 设置模式(深色|跟随系统|浅色)
 
-        setBarTransparent(binding.mainPageStatusBar, this,resources)
+        setBarTransparent(binding.mainPageStatusBar, this, resources)
         // 设置状态栏&导航栏透明
 
         setTopBar(true)
@@ -185,9 +193,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 getPermissions(permission = permission)
             }
             val ycKv = MMKV.defaultMMKV()
-            if (ycKv.decodeString("isFirst")=="true"){
-            }else{
-                firstInto(true,bindingViews,ycKv)
+            if (ycKv.decodeString("isFirst") == "true") {
+            } else {
+                firstInto(true, bindingViews, ycKv)
             }
             setPage3FolderList(bindingViews)
 
@@ -436,6 +444,77 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                             .show()
                     }
 
+                    R.id.toWebDav -> {
+                        val kv = MMKV.mmkvWithID("WebDav")
+                        if (kv.decodeInt("isLogin") != 1) {
+                            val view = layoutInflater.inflate(R.layout.webdav_edit, null)
+                            MaterialAlertDialogBuilder(
+                                this@MainActivity,
+                                com.google.android.material.R.style.MaterialAlertDialog_Material3
+                            )
+                                .setTitle("WebDav")
+                                .setView(view)
+                                .setNegativeButton("GO！") { _, _ ->
+                                    val ip =
+                                        view.findViewById<TextInputEditText>(R.id.web_dav_ip_edit).text.toString()
+                                    val ipRoot =
+                                        view.findViewById<TextInputEditText>(R.id.web_dav_ip_root_edit).text.toString()
+                                    val username =
+                                        view.findViewById<TextInputEditText>(R.id.web_dav_user_edit).text.toString()
+                                    val password =
+                                        view.findViewById<TextInputEditText>(R.id.web_dav_password_edit).text.toString()
+                                    val webdavIp = if (ip.takeLast(1) == "/") {
+                                        ip
+                                    } else {
+                                        "$ip/"
+                                    }
+                                    val webdavIpRoot = if (ipRoot.takeLast(1) == "/") {
+                                        ipRoot
+                                    } else {
+                                        "$ipRoot/"
+                                    }
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        try {
+                                            val sardine: Sardine = OkHttpSardine()
+                                            sardine.setCredentials(username, password)
+                                            if (!ip.contains("http")) {
+                                                ToastUtils.show("WebDav 服务器格式不正确！")
+                                                return@launch
+                                            }else if (!ip.contains(ipRoot)){
+                                                ToastUtils.show("根目录或Dav目录输入有误！")
+                                                return@launch
+                                            }
+                                            sardine.createDirectory(webdavIp + "VideoYou")
+                                            ToastUtils.show("登录成功！")
+                                            kv.encode("isLogin", 1)
+                                            sardine.delete(webdavIp + "VideoYou")
+                                        } catch (e: Exception) {
+                                            ToastUtils.showLong("连接失败\n${e.message}")
+                                        }
+                                    }
+                                    kv.encode("WebDavUser", username)
+                                    kv.encode("WebDavPassword", password)
+                                    kv.encode("WebDavIp", webdavIp)
+                                    kv.encode("WebDavIpRoot", webdavIpRoot)
+                                }
+                                .show()
+                            view.findViewById<TextInputEditText>(R.id.web_dav_ip_edit)
+                                .setText(kv.decodeString("WebDavIp"))
+                            view.findViewById<TextInputEditText>(R.id.web_dav_user_edit)
+                                .setText(kv.decodeString("WebDavUser"))
+                            view.findViewById<TextInputEditText>(R.id.web_dav_password_edit)
+                                .setText(kv.decodeString("WebDavPassword"))
+                            view.findViewById<TextInputEditText>(R.id.web_dav_ip_root_edit)
+                                .setText(kv.decodeString("WebDavIpRoot"))
+                        } else {
+                            val int = Intent(this@MainActivity,WebDavActivity::class.java)
+                            int.putExtra("webLine",kv.decodeString("WebDavIp"))
+                            int.putExtra("name","/")
+                            int.putExtra("dir",kv.decodeString("WebDavIp"))
+                            startActivity(int)
+                        }
+                    }
+
                     else -> {
                         ToastUtils.show(menuItem.itemId)
                     }
@@ -518,8 +597,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     }
 
     @Suppress("DEPRECATION")
-    private fun firstInto(isBoolean: Boolean, bindingViews: ArrayList<View>, ycKv:MMKV){
-        if (isBoolean){
+    private fun firstInto(isBoolean: Boolean, bindingViews: ArrayList<View>, ycKv: MMKV) {
+        if (isBoolean) {
             val view = layoutInflater.inflate(R.layout.app_is_activation, null)
             val tV = view.findViewById<TextView>(R.id.is_activation)
             tV.movementMethod = LinkMovementMethod.getInstance()
@@ -536,9 +615,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 .setNegativeButton("不同意") { _, _ ->
                     finish()
                 }
-                .setPositiveButton("我已知晓并承诺遵循"){_,_ ->
+                .setPositiveButton("我已知晓并承诺遵循") { _, _ ->
                     CoroutineScope(Dispatchers.IO).launch {
-                        ycKv.encode("isFirst","true")
+                        ycKv.encode("isFirst", "true")
                         if (!DatabaseStorage.writeDataToData(
                                 ReadMediaStore.start(
                                     contentResolver
@@ -575,7 +654,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         }
     }
 
-    private fun setThemeMode(){
+    private fun setThemeMode() {
         when (SettingsItemsUntil.readSettingData("darkMode")?.toInt()!!) {
             0 -> {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
@@ -607,6 +686,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         VideoObjects.paths = data
         VideoObjects.type = "LOCAL"
         VideoObjects.title = data
-        startActivity(Intent(this,VideoPlayer::class.java))
+        startActivity(Intent(this, VideoPlayer::class.java))
     }
 }

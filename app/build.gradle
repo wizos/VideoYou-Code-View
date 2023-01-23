@@ -131,6 +131,8 @@ dependencies {
     implementation 'com.github.getActivity:ToastUtils:11.2'
     // 权限请求框架：https://github.com/getActivity/XXPermissions
     implementation 'com.github.getActivity:XXPermissions:16.6'
+    // 网络请求框架：https://github.com/getActivity/EasyHttp
+    implementation 'com.github.getActivity:EasyHttp:11.5'
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.19'
     // Glide图片加载框架：https://github.com/bumptech/glide
     implementation 'com.github.bumptech.glide:glide:4.14.2'
@@ -139,7 +141,11 @@ dependencies {
     // implementation'ren.qinc.edgetranslucent:lib:0.0.3'
     // MMKV —— 基于 mmap 的高性能通用 key-value 组件：https://github.com/Tencent/MMKV/
     implementation 'com.tencent:mmkv:1.2.15'
-
+    // exoplayer 视频播放框架
     implementation 'com.google.android.exoplayer:exoplayer-core:2.18.2'
     implementation 'com.google.android.exoplayer:exoplayer-ui:2.18.2'
+    // webdav框架：https://github.com/thegrizzlylabs/sardine-android
+    implementation 'com.thegrizzlylabs.sardine-android:sardine-android:0.8'
+    // https://github.com/Blankj/AndroidUtilCode/
+    implementation 'com.blankj:utilcodex:1.31.1'
 }

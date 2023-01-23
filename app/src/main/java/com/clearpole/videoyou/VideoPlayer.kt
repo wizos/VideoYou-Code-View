@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
 import android.util.Rational
 import android.view.View
@@ -17,6 +18,7 @@ import android.widget.RelativeLayout
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import com.blankj.utilcode.util.EncodeUtils.base64Encode
 import com.clearpole.videoyou.code.VideoPlayerGestureListener
 import com.clearpole.videoyou.databinding.ActivityVideoPlayerBinding
 import com.clearpole.videoyou.model.VideoModel
@@ -27,6 +29,9 @@ import com.clearpole.videoyou.utils.TimeParse.Companion.timeParse
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
+import com.google.android.exoplayer2.upstream.DataSource
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.gyf.immersionbar.BarHide
 import com.gyf.immersionbar.ImmersionBar
@@ -34,14 +39,15 @@ import com.hjq.toast.ToastUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.lang.Thread.sleep
 
 
 class VideoPlayer : AppCompatActivity() {
     private lateinit var player: ExoPlayer
+
     @RequiresApi(Build.VERSION_CODES.O)
-    @SuppressLint("ResourceType", "LongLogTag")
-    @Suppress("DEPRECATION")
+    @SuppressLint("ResourceType", "LongLogTag", "MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding: ActivityVideoPlayerBinding =
@@ -132,20 +138,41 @@ class VideoPlayer : AppCompatActivity() {
             }
         }
         // 设置画中画
-        player = ExoPlayer.Builder(this).build()
-        binding.videoView.player = player
-
         try {
-            when (VideoObjects.type) {
-                "LOCAL" -> {
-                    player.addMediaItem(MediaItem.fromUri(VideoObjects.paths))
-                    // 如果是本地就载入本地视频路径
-                }
+            player = ExoPlayer.Builder(this).build()
+            if (intent.getStringExtra("webPath").isNullOrEmpty()) {
+                binding.videoView.player = player
+                when (VideoObjects.type) {
+                    "LOCAL" -> {
+                        player.addMediaItem(MediaItem.fromUri(VideoObjects.paths))
+                        // 如果是本地就载入本地视频路径
+                    }
 
-                "INTERNET" -> {
-                    player.addMediaItem(MediaItem.fromUri(Uri.parse(VideoObjects.paths)))
-                    // 如果是网络就载入网络视频路径
+                    "INTERNET" -> {
+                        player.addMediaItem(MediaItem.fromUri(Uri.parse(VideoObjects.paths)))
+                        // 如果是网络就载入网络视频路径
+                    }
                 }
+            } else {
+                val username = intent.getStringExtra("username")
+                val password = intent.getStringExtra("password")
+                val webPath = intent.getStringExtra("webPath")
+
+                val httpDataSourceFactory = DefaultHttpDataSource.Factory().setAllowCrossProtocolRedirects(true)
+                val dataSourceFactory = DataSource.Factory {
+                    val dataSource = httpDataSourceFactory.createDataSource()
+                    dataSource.setRequestProperty("Authorization",
+                        "Basic "+ base64Encode("$username:$password").decodeToString()
+                    )
+                    dataSource
+                }
+                player = ExoPlayer.Builder(this)
+                    .setMediaSourceFactory(DefaultMediaSourceFactory(dataSourceFactory))
+                    .build().apply {
+                        setMediaItem(MediaItem.fromUri(webPath.toString()))
+                        prepare()
+                    }
+                binding.videoView.player = player
             }
         } catch (e: Exception) {
             ToastUtils.show(e.message)
@@ -192,10 +219,10 @@ class VideoPlayer : AppCompatActivity() {
                                     //开启协程
                                     var nowProgress = 0L
                                     while (true) {
-                                        launch(Dispatchers.Main) {
+                                        withContext(Dispatchers.Main) {
                                             nowProgress = player.currentPosition
                                         }
-                                        if (!VideoPlayerObjects.isMove&&nowProgress<=allProgress) {
+                                        if (!VideoPlayerObjects.isMove && nowProgress <= allProgress) {
                                             binding.videoModel?.nowProgressString =
                                                 timeParse(nowProgress).toString()
                                             binding.videoModel?.nowProgressLong = nowProgress
@@ -227,6 +254,14 @@ class VideoPlayer : AppCompatActivity() {
         }
     }
 
+    fun headers(): DataSource.Factory? {
+        val headersMap: MutableMap<String, String> = HashMap()
+        headersMap["Authorization"] = "Basic YWRtaW46MzQxMjI2"
+        headersMap["Accept"] = "..."
+        return DefaultHttpDataSource.Factory().setDefaultRequestProperties(headersMap)
+            .setUserAgent("UA")
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun finish() {
         if (!VideoPlayerObjects.isAutoFinish) {
@@ -256,14 +291,13 @@ class VideoPlayer : AppCompatActivity() {
                     super.finish()
                 }
                 .show()
-        }else{
+        } else {
             VideoPlayerObjects.isAutoFinish = true
             super.finish()
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    @Suppress("DEPRECATION")
     override fun onUserLeaveHint() {
         if (SettingsItemsUntil.readSettingData("isAutoPicture").toBoolean()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -289,4 +323,5 @@ class VideoPlayer : AppCompatActivity() {
             findViewById<RelativeLayout>(R.id.video_player_control_root).visibility = View.VISIBLE
         }
     }
+
 }
